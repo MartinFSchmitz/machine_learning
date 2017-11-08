@@ -33,6 +33,8 @@ def entropy (a,b):
         return a * np.log2(1/a) + b * np.log2(1/b)
 
 def conditional_entropy (all_ex,part_ex):
+    if len(part_ex) == 0:
+        return 0
     pos = part_ex[part_ex.class_label == 1]  # all examples in part_ex that are labeled with 1 / 0
     #neg = part_ex[part_ex.class_label == 0]
 
@@ -110,7 +112,7 @@ def TDIDT( atts, node, depth): # list of attributes, current node, current depth
     
     # Some reasons why we should stop searching...
     
-    if depth > 3: # depth of the tree is 3 
+    if depth > 100: # depth of the tree is 3 
         #make leafs under that node
         make_leaf_with_fitting_class(node)
         return
