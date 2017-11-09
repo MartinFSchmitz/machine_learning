@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Nov  5 12:24:13 2017
-
 @author: marti
 """
 import numpy as np
@@ -11,6 +10,8 @@ import pydot
 import os
 import pickle
 from Node import Node
+import warnings
+warnings.filterwarnings("ignore")
 
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 
@@ -78,16 +79,16 @@ def compute_split_value(attr, node): # compute highest possible information gain
                 split_value = mean
         last = x
 
-    return 1,0.3
+    return highest_gain, split_value
 
 def select_split_attribute(atts, node):  # ToDo (only select attributes that were not chosen before)
-
+    
     split_attr = atts[0] #initialize variables
     max_inf_gain = 0
     split_value = 0
     
     for x in atts:
-        if not node.used_atts.__contains__(x):  # if attribute is not already used in upper part of the tree
+        if not x in node.used_atts:  # if attribute is not already used in upper part of the tree
             
             inf_gain, split = compute_split_value(x, node)  # compute highest possible gain for attribute x and the according split value
             
@@ -96,7 +97,9 @@ def select_split_attribute(atts, node):  # ToDo (only select attributes that wer
                 split_attr = x
                 split_value = split
     #print(split_attr)
+    
     return split_attr, split_value
+    
 
     
 def make_leaf_with_fitting_class(node):
@@ -107,24 +110,25 @@ def make_leaf_with_fitting_class(node):
 
     
     
-def TDIDT( atts, node, depth): # list of attributes, current node, current depth of the tree
-    #node_list.append(node)
-    
+def TDIDT( atts, node, depth, gparent, nparent, graph): # list of attributes, current node, current depth of the tree    
     # Some reasons why we should stop searching...
     
-    if depth > 100: # depth of the tree is 3 
+    if depth > 3: # depth of the tree is 3 
         #make leafs under that node
         make_leaf_with_fitting_class(node)
+        g_node = graphstuff(node, gparent, nparent, graph)
         return
     depth += 1
     # are the examples perfectly classified?
     all_classified, c = all_examples_classified(node.examples)
     if all_classified:
         node.becomes_leaf(c)
+        g_node = graphstuff(node, gparent, nparent, graph)
         return
         
     if (len(atts) <= len(node.used_atts)): # if we already used all attributes, we have a leaf
         make_leaf_with_fitting_class(node)
+        gg_node = graphstuff(node, gparent, nparent, graph)
         return
         
         
@@ -139,7 +143,12 @@ def TDIDT( atts, node, depth): # list of attributes, current node, current depth
         
     used_atts = copy.copy(node.used_atts)
     used_atts.append(split_att)  # append the currently used attribute to list of used attributes
-    #print(used_atts)
+    """
+    print("used_atts: ")
+    print(used_atts)
+    print("node.used_atts: ")
+    print(node.used_atts)
+    """
     
     
     # make new nodes for next iteration
@@ -150,54 +159,133 @@ def TDIDT( atts, node, depth): # list of attributes, current node, current depth
     
     node.split_value = split_val
     node.split_attr = split_att
-    ###node.label = "ha"
-    """
-    # draw everything into a pydot/ graphviz graph
-    label =  "ha" #split_att + " <= " + str(split_val)  #"s% <= d%" %(split_att, split_val)
-    g_node = pydot.Node("node", shape = "box", label= label , style="solid", fillcolor="red")
-    graph.add_node(g_node)
-    if parent != None:
-        graph.add_edge(pydot.Edge(parent, g_node))
-    """
-    # do the algorithm rekursively
-    TDIDT(atts, new_node_left, depth)  
-    TDIDT(atts, new_node_right, depth)
-        
-        
+    node.label = split_att + " <= " + str(split_val)  #"s% <= d%" %(split_att, split_val)
+    node.label += '\n' + "Samples: " + str(len(node.examples)) + '\n' + "trisomic: " + str(len(node.examples[node.examples.class_label == 1]))
+    node.label += " " + "healthy: " +  str(len(node.examples[node.examples.class_label == 0]))
     
+    # draw everything into a pydot/ graphviz graph
+    g_node = graphstuff(node, gparent, nparent, graph)
+    
+    # do the algorithm rekursively
+    TDIDT(atts, new_node_left, depth, g_node, node, graph)  
+    TDIDT(atts, new_node_right, depth, g_node, node, graph)
+        
+
+def graphstuff(node, gparent, nparent, graph):      
+    global nodenr
+    
+    if (node.leaf):
+        g_node = pydot.Node(nodenr, shape = "oval", label= node.label , style="solid", fillcolor="red")
+    else:
+        g_node = pydot.Node(nodenr, shape = "box", label= node.label , style="solid", fillcolor="red")
+    graph.add_node(g_node)
+    if gparent != None:
+        if (nparent.left == node):
+            graph.add_edge(pydot.Edge(gparent, g_node, label = "True"))
+        else:
+            graph.add_edge(pydot.Edge(gparent, g_node, label = "False"))
+
+    nodenr += 1    
+    return g_node
+
+def intializeTDIDT(dataFrame, graphName):
+    global nodenr
+    nodenr = 0
+
+    tree = Node(examples = dataFrame) #create an empty root node that will grow to a tree
+    tree.used_atts.append('class_label')
+    graph = pydot.Dot(graph_type='graph')
+
+    print("")
+    print("     Start of TDIDT")
+    TDIDT(atts, tree, 0, None, None, graph) # afterwards tree is a real tree
+    print("     Finish of TDIDT")
+
+    print("")
+    print("     Outputing Tree Data")
+    pickle.dump(tree, open(graphName + ".p", "wb"))   
+
+    graph.write_png(graphName + '.png')
+    graph.write_dot(graphName + '.dot')
+
+def correct_labeled(x, node):
+    
+    if(node.leaf):
+        if(x.class_label == node.label):
+            return 1
+        else:
+            return 0
+    else:
+    
+        value = getattr(x, node.split_attr)
+        
+        if ( value <= node.split_value):
+            return correct_labeled(x, node.left)
+            
+        else:
+            return correct_labeled(x, node.right)
+
+
+def flipAttributes(dataFrame, percentage):
+    dataFrameCopy = copy.copy(dataFrame)
+
+    iter_csv = dataFrameCopy.itertuples() # only itertuples brings the fitting format
+    last = next(iter_csv) # skip first entry
+    i = 0
+    j = 0
+    for x in iter_csv:
+        rnd = np.random.random()
+        if (rnd < percentage):
+            j += 1
+            if (x.class_label == 0):
+                dataFrameCopy.set_value(i, 'class_label', 1)
+            else:
+                dataFrameCopy.set_value(i, 'class_label', 0)
+        i += 1
+    print("         Labels Flipped: " + str(j) + " / " + str(len(dataFrameCopy)))
+    print("         Percentage: " + str(j / len(dataFrameCopy)))    
+
+    return dataFrameCopy
+
+def calculateAccuracy(graphName):
+    csv = pd.read_csv('gene_expression_test.csv')
+    tree = pickle.load( open( graphName + ".p", "rb" ) )
+    correct = 0
+
+    iter_csv = csv.itertuples() #brings fitting format of one example
+    
+    for x in iter_csv:
+        correct += correct_labeled(x, tree)
+
+    accuracy = float(correct) / float(len(csv))
+         
+    print(graphName + " Correct: " + str(correct) + " Sample Size: " + str(len(csv)) + " Accuracy :" + str(accuracy))  
+
+nodenr = 0   
 csv = pd.read_csv('gene_expression_training.csv')
 atts = csv.columns  # if you want to delete one entry: .delete(0)
 used_atts = []  # list with used attributes
                 # use: used_atts.__contains__(x) to ask if indices there
                 # and used_atts.append(x) to append index
 
-tree = Node(examples = csv) #create an empty root node that will grow to a tree
-#graph = pydot.Dot(graph_type='graph')
-node_list = []
-print("start")
-TDIDT(atts, tree, 0) # afterwards tree is a real tree
-print("finished")
+print("Start of Task 4: ")
+intializeTDIDT(csv, "Excersise#4")
+print("Finish of Task 4")
 
-pickle.dump(tree, open("tree.p", "wb"))
+print("")
+print("Start of Task 5.3: ")
+print("     Start of Task 5.3a:")
+intializeTDIDT(flipAttributes(csv, 0.1), "Excersise#5_3a")
+print("     Finish of Task 5.3a")
 
-"""
-g = pydot.Node("node", shape = "box", label = "tree.label" , style="solid", fillcolor="red")
-iter_nodes = iter(node_list)
-next(iter_nodes)
-for n in node_list:
-"""
-    
+print("")
+print("     Start of Task 5.3b:")
+intializeTDIDT(flipAttributes(csv, 0.25), "Excersise#5_3b")
+print("     Finish of Task 5.3b")
+print("Finish of 5.3")
 
-#graph.write_png('example1_graph.png')
-
-
-
-# csv.values[x] gives values of line x, csv[0:2] gives the first two lines + header
-# csv.columns gives the name of the columns, so the header line
-# csv.iloc[3:5,0:2] gives the data in typed range
-# sorted_csv = csv.sort_values(by='class_label')
-# csv[csv.class_label == 1] split by dataaa value !!!!!!!!
-# sorted_csv.split
-# print(csv)
-
+print("")
+calculateAccuracy("Excersise#4")
+calculateAccuracy("Excersise#5_3a")
+calculateAccuracy("Excersise#5_3b")
 

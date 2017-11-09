@@ -11,7 +11,7 @@ from Node import Node
 
 def correct_labeled(x, node):
     
-    if(node.leaf == True):
+    if(node.leaf):
         if(x.class_label == node.label):
             return 1
         else:

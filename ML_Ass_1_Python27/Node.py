@@ -20,8 +20,7 @@ class Node(object):
         self.leaf = leaf
 
         
-    def becomes_leaf(node,c):
-        node.leaf = True
-        node.label = c
+    def becomes_leaf(self,c):
+        self.leaf = True
+        self.label = c
         
-
