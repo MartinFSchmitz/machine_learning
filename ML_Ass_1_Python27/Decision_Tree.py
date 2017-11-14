@@ -259,7 +259,7 @@ def calculateAccuracy(graphName):
 
     accuracy = float(correct) / float(len(csv))
          
-    print(graphName + " Correct: " + str(correct) + " Sample Size: " + str(len(csv)) + " Accuracy :" + str(accuracy))  
+    print(graphName + " Correct: " + str(correct) + " Sample Size: " + str(len(csv)) + " Accuracy: " + str(accuracy))  
 
 nodenr = 0   
 csv = pd.read_csv('gene_expression_training.csv')
