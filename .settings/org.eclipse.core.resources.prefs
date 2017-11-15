@@ -1,5 +1,7 @@
 eclipse.preferences.version=1
+encoding//ML_Ass_1_Python27/Classification_Rules.py=utf-8
 encoding//ML_Ass_1_Python27/Decision_Tree.py=utf-8
 encoding//ML_Ass_1_Python27/Node.py=utf-8
-encoding//ML_Ass_1_Python27/Pydot_test.py=utf-8
-encoding//ML_Ass_1_Python27/Use_Tree.py=utf-8
+encoding//ML_Ass_1_Python27/Pruning_heuristic.py=utf-8
+encoding//ML_Ass_1_Python27/Pruning_petr.py=utf-8
+encoding//ML_Ass_1_Python27/estimate_error.py=utf-8

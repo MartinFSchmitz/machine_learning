@@ -269,9 +269,9 @@ used_atts = []  # list with used attributes
                 # and used_atts.append(x) to append index
 
 print("Start of Task 4: ")
-intializeTDIDT(csv, "Excersise#4")
+intializeTDIDT(csv, "Excersise_4")
 print("Finish of Task 4")
-
+"""
 print("")
 print("Start of Task 5.3: ")
 print("     Start of Task 5.3a:")
@@ -289,3 +289,4 @@ calculateAccuracy("Excersise#4")
 calculateAccuracy("Excersise#5_3a")
 calculateAccuracy("Excersise#5_3b")
 
+"""
