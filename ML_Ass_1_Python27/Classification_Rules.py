@@ -104,7 +104,7 @@ def prun_ruleset():
                     pruned = True
                     break
         PRUNED_RULE_SET.append(rule)
-CSV = pd.read_csv('gene_expression_test.csv')
+CSV = pd.read_csv('gene_expression_training.csv')
 TREE = pickle.load( open( "Excersise#5_3a.p", "rb") )
 RULE_SET = []
 PRUNED_RULE_SET = []

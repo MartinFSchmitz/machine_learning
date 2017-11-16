@@ -132,20 +132,30 @@ def pre_order_traversal(node, g_parent, n_parent):
     pre_order_traversal(node.left, g_node, node)
     pre_order_traversal(node.right, g_node, node)
 
+def prune_petr(graphNameToPrune, newGraphName, csv):
+    global CSV
+    global TREE
+    global nodenr
+    global GRAPH 
+
+    nodenr = 0
+    GRAPH = pydot.Dot(graph_type='graph')
+
+  
+    CSV = csv
+    TREE = pickle.load( open(graphNameToPrune + ".p", "rb") )
+    post_order_traversal(TREE)
+    pre_order_traversal(TREE, None, None)
+
+
+    pickle.dump(TREE, open(newGraphName + ".p", "wb"))
+    GRAPH.write_png(newGraphName + '.png')
+    GRAPH.write_dot(newGraphName + '.dot')
+
+CSV = 0
+TREE = 0
 nodenr = 0
-#estimate = 
-GRAPH = pydot.Dot(graph_type='graph')
-CSV = pd.read_csv('gene_expression_training.csv')
-TREE = pickle.load( open( "Excersise#4.p", "rb") )
-post_order_traversal(TREE)
-pre_order_traversal(TREE, None, None)
-
-
-
-GRAPH.write_png('pruned_error_tree.png')
-GRAPH.write_dot('pruned_error_tree.dot')
-
-
+GRAPH = 0
 
 
 

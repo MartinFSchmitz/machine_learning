@@ -10,6 +10,8 @@ import pydot
 import os
 import pickle
 from Node import Node
+from Pruning_heuristic import prune_heuristicly
+from Pruning_petr import prune_petr
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -197,12 +199,12 @@ def intializeTDIDT(dataFrame, graphName):
     graph = pydot.Dot(graph_type='graph')
 
     print("")
-    print("     Start of TDIDT")
+    print("         Start of TDIDT")
     TDIDT(atts, tree, 0, None, None, graph) # afterwards tree is a real tree
-    print("     Finish of TDIDT")
+    print("         Finish of TDIDT")
 
     print("")
-    print("     Outputing Tree Data")
+    print("         Outputing Tree Data")
     pickle.dump(tree, open(graphName + ".p", "wb"))   
 
     graph.write_png(graphName + '.png')
@@ -261,6 +263,7 @@ def calculateAccuracy(graphName):
          
     print(graphName + " Correct: " + str(correct) + " Sample Size: " + str(len(csv)) + " Accuracy: " + str(accuracy))  
 
+
 nodenr = 0   
 csv = pd.read_csv('gene_expression_training.csv')
 atts = csv.columns  # if you want to delete one entry: .delete(0)
@@ -268,25 +271,78 @@ used_atts = []  # list with used attributes
                 # use: used_atts.__contains__(x) to ask if indices there
                 # and used_atts.append(x) to append index
 
-print("Start of Task 4: ")
-intializeTDIDT(csv, "Excersise_4")
-print("Finish of Task 4")
+print("")
+print("Start of Excersise Sheet #2 calculations")
+print("     Start of Task 4: ")
+intializeTDIDT(csv,     "Excersise#4")
+print("     Finish of Task 4")
+
+print("")
+print("     Start of Task 5.3: ")
+print("         Start of Task 5.3a:")
+csv01 = flipAttributes(csv, 0.1)
+intializeTDIDT(csv01, "Excersise#5_3a")
+print("         Finish of Task 5.3a")
+
+print("")
+print("         Start of Task 5.3b:")
+csv025 = flipAttributes(csv, 0.25)
+intializeTDIDT(csv025, "Excersise#5_3b")
+print("         Finish of Task 5.3b")
+print("     Finish of 5.3")
+print("Finish of Excersise Sheet #2 calculations")
+print("")
+
+print("Start of Excersise Sheet #3 calculations")
+
+print("     Start of pruning heuristic")
+print("")
+prune_heuristicly("Excersise#4", "Excersise#4_pruned_heuristic", csv)
+prune_heuristicly("Excersise#5_3a", "Excersise#5_3a_pruned_heuristic", csv01)
+prune_heuristicly("Excersise#5_3b", "Excersise#5_3b_pruned_heuristic", csv025)
+print("")
+print("     Finish of pruning heuristic")
+print("")
+
+print("     Start of pruning petr")
+print("")
+prune_petr("Excersise#4", "Excersise#4_pruned_petr", csv)
+prune_petr("Excersise#5_3a", "Excersise#5_3a_pruned_petr", csv01)
+prune_petr("Excersise#5_3b", "Excersise#5_3b_pruned_petr", csv025)
+print("")
+print("     Finish of pruning petr")
+print("")
+print("")
+
 """
+print("     Start of Classification Rules")
 print("")
-print("Start of Task 5.3: ")
-print("     Start of Task 5.3a:")
-intializeTDIDT(flipAttributes(csv, 0.1), "Excersise#5_3a")
-print("     Finish of Task 5.3a")
+
+TODO
 
 print("")
-print("     Start of Task 5.3b:")
-intializeTDIDT(flipAttributes(csv, 0.25), "Excersise#5_3b")
-print("     Finish of Task 5.3b")
-print("Finish of 5.3")
-
+print("     Finish of Classification Rules")
 print("")
+print("")
+"""
+print("Finish of Excersise Sheet #3 calculations")
+print("")
+print("")
+
+print("Accuracy of unpruned trees:")
 calculateAccuracy("Excersise#4")
 calculateAccuracy("Excersise#5_3a")
 calculateAccuracy("Excersise#5_3b")
+print("")
+print("Accuracy of heuristicly pruned trees:")
+calculateAccuracy("Excersise#4_pruned_heuristic")
+calculateAccuracy("Excersise#5_3a_pruned_heuristic")
+calculateAccuracy("Excersise#5_3b_pruned_heuristic")
+print("")
+print("Accuracy of petr pruned trees:")
+calculateAccuracy("Excersise#4_pruned_petr")
+calculateAccuracy("Excersise#5_3a_pruned_petr")
+calculateAccuracy("Excersise#5_3b_pruned_petr")
+print("")
+print("Accuracy of Classification Rules:")
 
-"""
