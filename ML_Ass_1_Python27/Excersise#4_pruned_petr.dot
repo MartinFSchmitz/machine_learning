@@ -1,0 +1,11 @@
+graph G {
+	graph [bb="0,0,54,36"];
+	node [label="\N"];
+	0	 [fillcolor=red,
+		height=0.5,
+		label=1,
+		pos="27,18",
+		shape=oval,
+		style=solid,
+		width=0.75];
+}

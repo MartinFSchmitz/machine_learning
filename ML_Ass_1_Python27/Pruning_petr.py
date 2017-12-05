@@ -42,7 +42,7 @@ def compute_prun_acc(y, n): # computes acuracy when node is a leafnode and fitti
     prun_class = 0
     if n == 0:
         return 1, 0
-    if y / float(n) < 0.5:
+    if (n-y) / float(n) > 0.5: # more examples with label 1?
         y = n - y 
         prun_class = 1 # class after pruning
 
@@ -54,7 +54,6 @@ def compute_accuracys(current_node):
     iter_csv = CSV.itertuples() #brings fitting format of one example
     correct = 0.
     labels = 0.
-    prun_class = 0 
     
     total_len = float(len(CSV)) # total length of all examples
 
@@ -97,11 +96,11 @@ def graphstuff(node, gparent, nparent, graph):
 
 def pruning(node):
     accuracy, prun_accuracy , prun_class = compute_accuracys(node)
+    
     #print(accuracy, prun_accuracy)
     # ToDo make new node and substitude old one
     if prun_accuracy >= accuracy:
         make_node_to_leaf(node, prun_class)
-        print("pruned")
         
 def post_order_traversal(node):
     if(node.leaf): return
