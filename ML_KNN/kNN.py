@@ -82,7 +82,7 @@ def compute_accuracy(training,test, k):
         if sample_class == test.iloc[sample].class_label:
             
             correct_sampled +=1
-    print("K = " + k)
+    print("K = " + str(k))
     print("Accuracy: " + str(correct_sampled / float(len(test))))
         
 def get_csv_plus_header(data):
