@@ -7,12 +7,13 @@ import numpy as np
 import pandas as pd
 import copy
 import pickle
-from scipy.spatial.distance import cosine
+from scipy.spatial import distance
 import sys
 import time
 
 """            Hyper-Parameters            """
 K = 3
+GROUP_DEPENDANT_TASK = False
 
 #------------------------------------------------------
 
@@ -53,9 +54,13 @@ def get_neighbors(training, sample, k):
     train_with_dist = copy.copy(pd.concat([training, dist_row], axis = 1)) # append distrow to training data
 
     for x in range (len(training)): # compute cosine distance for every trainings sample
-        d = cosine(sample, training.iloc[x])
+        if GROUP_DEPENDANT_TASK:
+            d = distance.euclidean(sample, training.iloc[x])
+        else:
+            d = distance.cosine(sample, training.iloc[x])
         train_with_dist.iloc[x].distance = d
-        
+    
+
     sorted_tuples = train_with_dist.sort_values(by="distance", ascending = True)  # sort list after attribute attr
     # now the k first entrys in sorted tuples are the k nearest neighbors of test-sample
     return sorted_tuples[:k] # return k first elements as k nearest neighbors
